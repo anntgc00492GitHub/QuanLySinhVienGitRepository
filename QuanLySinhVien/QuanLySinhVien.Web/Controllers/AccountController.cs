@@ -22,7 +22,7 @@ namespace QuanLySinhVien.Web.Controllers
         {
         }
 
-        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
+        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
         {
             UserManager = userManager;
             SignInManager = signInManager;
@@ -34,9 +34,9 @@ namespace QuanLySinhVien.Web.Controllers
             {
                 return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
             }
-            private set 
-            { 
-                _signInManager = value; 
+            private set
+            {
+                _signInManager = value;
             }
         }
 
@@ -70,7 +70,20 @@ namespace QuanLySinhVien.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                var user = await UserManager.FindByNameAsync(model.Email);
+                if (user != null)
+                {
+                    if (!await UserManager.IsEmailConfirmedAsync(user.Id))
+                    {
+                        string callbackUrl = await SendEmailConfirmationTokenAsync(user.Id, "Confirm your account-Resend");
+                        //XUÂT BIẾN RA CHỈ ĐỂ DEBUG XEM NÓ CO CHẠY KHÔNG THÔI CAI NÀY DÙNG ĐỂ gửi lại khi cố login khi chưa confirm
+                        // Uncomment to debug locally  
+                        // ViewBag.Link = callbackUrl;
+                        ViewBag.errorMessage = "You must have a confirmed email to log on. "
+                                             + "The confirmation token has been resent to your email account.";
+                        return View("Error");
+                    }
+                }
             }
 
             // This doesn't count login failures towards account lockout
@@ -86,7 +99,7 @@ namespace QuanLySinhVien.Web.Controllers
                     return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
                 case SignInStatus.Failure:
                 default:
-                    ModelState.AddModelError("", "Invalid login attempt.");
+                    ModelState.AddModelError("", "Đăng nhập không thành công !");
                     return View(model);
             }
         }
@@ -120,7 +133,7 @@ namespace QuanLySinhVien.Web.Controllers
             // If a user enters incorrect codes for a specified amount of time then the user account 
             // will be locked out for a specified amount of time. 
             // You can configure the account lockout settings in IdentityConfig
-            var result = await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent:  model.RememberMe, rememberBrowser: model.RememberBrowser);
+            var result = await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent: model.RememberMe, rememberBrowser: model.RememberBrowser);
             switch (result)
             {
                 case SignInStatus.Success:
@@ -155,15 +168,20 @@ namespace QuanLySinhVien.Web.Controllers
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
+                    //await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
+
                     // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
                     // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
                     // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
 
-                    return RedirectToAction("Index", "Home");
+                    //return RedirectToAction("Index", "Home");
+
+                    string callbackUrl = await SendEmailConfirmationTokenAsync(user.Id, "Xác thực tài khoản của bạn");
+                    //không cho phi lai 
+                    ViewBag.Message = "Kiểm tra email của bạn để xác thực mail, Email của bạn phải được xác thực trước khi sử dungj";
+                    return View("Info");
                 }
                 AddErrors(result);
             }
@@ -215,6 +233,13 @@ namespace QuanLySinhVien.Web.Controllers
                 // var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);		
                 // await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>");
                 // return RedirectToAction("ForgotPasswordConfirmation", "Account");
+
+                string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+                var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                await UserManager.SendEmailAsync(user.Id, "Reset Password", "Click vào đầy để reset mật khẩu <a href=\"" + callbackUrl + "\">here</a>");
+                return RedirectToAction("ForgotPasswordConfirmation", "Account");
+
+
             }
 
             // If we got this far, something failed, redisplay form
@@ -481,5 +506,17 @@ namespace QuanLySinhVien.Web.Controllers
             }
         }
         #endregion
+
+        private async Task<string> SendEmailConfirmationTokenAsync(string userID, string subject)
+        {
+            string code = await UserManager.GenerateEmailConfirmationTokenAsync(userID);
+            var callbackUrl = Url.Action("ConfirmEmail", "Account",
+               new { userId = userID, code = code }, protocol: Request.Url.Scheme);
+            await UserManager.SendEmailAsync(
+                userID, 
+                subject,
+               "Click vào link này để xác nhận lại mật khẩu "+ callbackUrl);
+            return callbackUrl;
+        }
     }
 }

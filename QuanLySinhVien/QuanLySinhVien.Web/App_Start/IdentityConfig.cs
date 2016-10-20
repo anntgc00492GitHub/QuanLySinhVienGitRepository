@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Net.Mime;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
@@ -19,7 +22,37 @@ namespace QuanLySinhVien.Web
         public Task SendAsync(IdentityMessage message)
         {
             // Plug in your email service here to send an email.
+            sendMail(message);
             return Task.FromResult(0);
+        }
+
+
+        //xEM CODE GUI MAIL CHUAN O DAY, PHAI CHINH LAI MAY CAI NO SAI:https://www.asp.net/identity/overview/features-api/account-confirmation-and-password-recovery-with-aspnet-identity
+        void sendMail(IdentityMessage message)
+        {
+            #region formatter
+            string text = $"Đây là mail dùng để {message.Subject}: {message.Body}";// CACH VIET KHAC  string text = string.Format("Please click on this link to {0}: {1}", message.Subject, message.Body);
+
+            //string html = "Xin ấn vào đường link sau để xác nhận mật khẩu:</br> " +
+            //              "<a href='" + message.Body + "'>link</a><br/>";
+
+            //html += HttpUtility.HtmlEncode(@"Or click on the copy the following link on the browser:" + message.Body);
+            
+            #endregion
+
+            MailMessage msg = new MailMessage();
+            msg.From = new MailAddress("trongan1991@gmail.com");
+            msg.To.Add(new MailAddress(message.Destination));
+            msg.Subject = message.Subject;
+            msg.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(text, null, MediaTypeNames.Text.Plain));
+
+            //msg.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(html, null, MediaTypeNames.Text.Html));//Dung voi html, tren co plain roi nen thoi
+
+            SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", Convert.ToInt32(587));
+            NetworkCredential credentials = new NetworkCredential("trongan1991@gmail.com", "angc00492");
+            smtpClient.Credentials = credentials;
+            smtpClient.EnableSsl = true;
+            smtpClient.Send(msg);
         }
     }
 
@@ -54,10 +87,10 @@ namespace QuanLySinhVien.Web
             manager.PasswordValidator = new PasswordValidator
             {
                 RequiredLength = 6,
-                RequireNonLetterOrDigit = true,
+                RequireNonLetterOrDigit = false,
                 RequireDigit = true,
-                RequireLowercase = true,
-                RequireUppercase = true,
+                RequireLowercase = false,
+                RequireUppercase = false,
             };
 
             // Configure user lockout defaults
