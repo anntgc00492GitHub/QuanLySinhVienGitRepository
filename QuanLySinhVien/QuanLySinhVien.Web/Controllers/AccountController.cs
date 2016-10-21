@@ -92,6 +92,10 @@ namespace QuanLySinhVien.Web.Controllers
             switch (result)
             {
                 case SignInStatus.Success:
+                    if (string.IsNullOrEmpty(returnUrl))
+                    {
+                        return RedirectToAction("Index", "AdminHome", new { area = "Admin" });
+                    }
                     return RedirectToLocal(returnUrl);
                 case SignInStatus.LockedOut:
                     return View("Lockout");
@@ -420,6 +424,11 @@ namespace QuanLySinhVien.Web.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        public ActionResult LogOff2()
+        {
+            AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+            return RedirectToAction("Index", "Home");
+        }
         //
         // GET: /Account/ExternalLoginFailure
         [AllowAnonymous]
