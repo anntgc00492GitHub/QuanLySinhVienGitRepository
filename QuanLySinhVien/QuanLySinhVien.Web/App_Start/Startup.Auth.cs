@@ -7,7 +7,7 @@ using Microsoft.Owin.Security.Google;
 using Owin;
 using QuanLySinhVien.Web.Models;
 
-namespace QuanLySinhVien.Web
+namespace QuanLySinhVien.Web.App_Start
 {
     public partial class Startup
     {
