@@ -49,6 +49,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Infrastructure\DbFactory.cs" />
+    <Compile Include="Infrastructure\Disposable.cs" />
+    <Compile Include="Infrastructure\IDbFactory.cs" />
+    <Compile Include="Infrastructure\IRepository.cs" />
+    <Compile Include="Infrastructure\IUnitOfWork.cs" />
+    <Compile Include="Infrastructure\ReponsitoryBase.cs" />
+    <Compile Include="Infrastructure\UnitOfWork.cs" />
     <Compile Include="Migrations\201610220400234_kt.cs" />
     <Compile Include="Migrations\201610220400234_kt.Designer.cs">
       <DependentUpon>201610220400234_kt.cs</DependentUpon>
@@ -56,6 +63,13 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="QuanLySinhVienDbContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\CourseRepository.cs" />
+    <Compile Include="Repositories\DepartmentRepository.cs" />
+    <Compile Include="Repositories\EnrollmentRepository.cs" />
+    <Compile Include="Repositories\InstructorRepository.cs" />
+    <Compile Include="Repositories\OfficeAssignmentRepository.cs" />
+    <Compile Include="Repositories\StudentRepository.cs" />
+    <Compile Include="Repositories\AssignmentRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\QuanLySinhVien.Models\QuanLySinhVien.Models.csproj">

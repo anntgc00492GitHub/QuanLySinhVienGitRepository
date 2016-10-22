@@ -7,18 +7,28 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using QuanLySinhVien.Data;
+using QuanLySinhVien.Data.Repositories;
 using QuanLySinhVien.Models.Models;
+using QuanLySinhVien.Service;
 
 namespace QuanLySinhVien.Web.Areas.Admin.Controllers
 {
     public class StudentsController : Controller
     {
+        private IStudentService studentService;
+
+        public StudentsController(IStudentService studentService)
+        {
+            this.studentService = studentService;
+        }
+
         private QuanLySinhVienDbContext db = new QuanLySinhVienDbContext();
 
         // GET: Admin/Students
         public ActionResult Index()
         {
-            return View(db.Students.ToList());
+            //return View(db.Students.ToList());
+            return View(studentService.GetAll().ToList());
         }
 
         // GET: Admin/Students/Details/5
@@ -28,7 +38,8 @@ namespace QuanLySinhVien.Web.Areas.Admin.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Student student = db.Students.Find(id);
+            //Student student = db.Students.Find(id);
+            Student student = studentService.GetById(id);
             if (student == null)
             {
                 return HttpNotFound();
@@ -51,8 +62,10 @@ namespace QuanLySinhVien.Web.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Students.Add(student);
-                db.SaveChanges();
+                //db.Students.Add(student);
+                //db.SaveChanges();
+                studentService.Add(student);
+                studentService.Save();
                 return RedirectToAction("Index");
             }
 
@@ -66,7 +79,8 @@ namespace QuanLySinhVien.Web.Areas.Admin.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Student student = db.Students.Find(id);
+            //Student student = db.Students.Find(id);
+            Student student = studentService.GetById(id);
             if (student == null)
             {
                 return HttpNotFound();
@@ -83,8 +97,10 @@ namespace QuanLySinhVien.Web.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(student).State = EntityState.Modified;
-                db.SaveChanges();
+                //db.Entry(student).State = EntityState.Modified;
+                //db.SaveChanges();
+                studentService.Update(student);
+                studentService.Save();
                 return RedirectToAction("Index");
             }
             return View(student);
@@ -97,7 +113,8 @@ namespace QuanLySinhVien.Web.Areas.Admin.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Student student = db.Students.Find(id);
+            //Student student = db.Students.Find(id);
+            Student student = studentService.GetById(id);
             if (student == null)
             {
                 return HttpNotFound();
@@ -110,9 +127,11 @@ namespace QuanLySinhVien.Web.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Student student = db.Students.Find(id);
-            db.Students.Remove(student);
-            db.SaveChanges();
+            //Student student = db.Students.Find(id);
+            //db.Students.Remove(student);
+            //db.SaveChanges();
+            studentService.Delete(id);
+            studentService.Save();
             return RedirectToAction("Index");
         }
 

@@ -6,6 +6,10 @@ using Autofac;
 using Autofac.Integration.Mvc;
 using Microsoft.Owin;
 using Owin;
+using QuanLySinhVien.Data;
+using QuanLySinhVien.Data.Infrastructure;
+using QuanLySinhVien.Data.Repositories;
+using QuanLySinhVien.Service;
 
 [assembly: OwinStartup(typeof(QuanLySinhVien.Web.App_Start.Startup))]
 
@@ -26,19 +30,19 @@ namespace QuanLySinhVien.Web.App_Start
 
             //Mở hết comment ra khi có repository
 
-            //builder.RegisterType<UnitOfWork>().As<IUnitOfWork>().InstancePerRequest();
-            //builder.RegisterType<DbFactory>().As<IDbFactory>().InstancePerRequest();
-            //builder.RegisterType<Anntgc00492UniversityDbContext>().AsSelf().InstancePerRequest();
+            builder.RegisterType<UnitOfWork>().As<IUnitOfWork>().InstancePerRequest();
+            builder.RegisterType<DbFactory>().As<IDbFactory>().InstancePerRequest();
+            builder.RegisterType<QuanLySinhVienDbContext>().AsSelf().InstancePerRequest();
 
-            // Repositories
-            //builder.RegisterAssemblyTypes(typeof(StudentRepository).Assembly)
-            //    .Where(t => t.Name.EndsWith("Repository"))
-            //    .AsImplementedInterfaces().InstancePerRequest();
+            //Repositories
+            builder.RegisterAssemblyTypes(typeof(StudentRepository).Assembly)
+                .Where(t => t.Name.EndsWith("Repository"))
+                .AsImplementedInterfaces().InstancePerRequest();
 
-            // Services
-            //builder.RegisterAssemblyTypes(typeof(StudentService).Assembly)
-            //   .Where(t => t.Name.EndsWith("Service"))
-            //   .AsImplementedInterfaces().InstancePerRequest();
+            //Services
+            builder.RegisterAssemblyTypes(typeof(StudentService).Assembly)
+               .Where(t => t.Name.EndsWith("Service"))
+               .AsImplementedInterfaces().InstancePerRequest();
 
             Autofac.IContainer container = builder.Build();
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));
