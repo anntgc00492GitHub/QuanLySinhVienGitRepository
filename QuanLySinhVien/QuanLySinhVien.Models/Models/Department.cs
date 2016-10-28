@@ -16,7 +16,7 @@ namespace QuanLySinhVien.Models.Models
         public string Name { get; set; }
         [DataType(DataType.Currency),Column(TypeName = "money")]
         public decimal Budget { get; set; }
-        [DataType(DataType.Date),DisplayFormat(DataFormatString = "{0:dd-MM-YYYY}")]
+        [DataType(DataType.Date),DisplayFormat(DataFormatString = "{0:dd-MM-yyyy}")]
         public DateTime StartDate { get; set; }
 
         public int? InstructorID { get; set; }
